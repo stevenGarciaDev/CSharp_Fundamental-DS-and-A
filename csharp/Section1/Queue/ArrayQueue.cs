@@ -50,6 +50,8 @@ namespace csharp.Section1.Queue
             _queue[_size++] = item;
         }
 
+        public bool IsEmpty() => _size == 0;
+
         public T Peek()
         {
             if (_size == 0)
