@@ -7,5 +7,6 @@ namespace csharp.Section1.Queue
         T Peek();
         void Enqueue(T item);
         int Count();
+        bool IsEmpty();
     }
 }
