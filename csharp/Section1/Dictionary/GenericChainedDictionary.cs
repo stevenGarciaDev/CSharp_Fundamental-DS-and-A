@@ -5,6 +5,7 @@ namespace csharp.Section1.Dictionary
 {
     public class GenericChainedDictionary<K, V> : IGenericDictionary<K, V>
     {
+        // An array of linked lists.
         private LinkedList<Entry<K, V>>[] _map;
         private int _size;
 
@@ -29,10 +30,10 @@ namespace csharp.Section1.Dictionary
 
         public void Add(K key, V value)
         {
-            if (this.doesNeedResizing())
-                this.resize();
+            if (this.DoesNeedResizing())
+                this.Resize();
 
-            LinkedList<Entry<K, V>> bucket = getOrCreateBucket(key);
+            LinkedList<Entry<K, V>> bucket = GetOrCreateBucket(key);
             foreach (Entry<K, V> entry in bucket)
             {
                 if (entry.Value.Equals(value))
@@ -41,18 +42,6 @@ namespace csharp.Section1.Dictionary
             Entry<K, V> newEntry = new Entry<K, V> { Key = key, Value = value };
             bucket.AddLast(newEntry);
             _size++;
-        }
-
-        public V GetValueOrDefault(K key)
-        {
-            var bucket = this.getOrCreateBucket(key);
-            if (bucket.Count == 0) return default(V);
-            foreach (Entry<K, V> entry in bucket)
-            {
-                if (entry.Key.Equals(key))
-                    return entry.Value;
-            }
-            return default(V);
         }
 
         public void Clear()
@@ -76,7 +65,15 @@ namespace csharp.Section1.Dictionary
 
         public bool ContainsValue(V value)
         {
-            throw new System.NotImplementedException();
+            foreach (LinkedList<Entry<K, V>> bucket in _map)
+            {
+                foreach (Entry<K, V> entry in bucket)
+                {
+                    if (entry.Value.Equals(value))
+                        return true;
+                }
+            }
+            return false;
         }
 
         public int Count()
@@ -86,17 +83,54 @@ namespace csharp.Section1.Dictionary
 
         public K[] Keys()
         {
-            throw new System.NotImplementedException();
+            List<K> allKeys = new List<K>();
+            foreach (LinkedList<Entry<K, V>> bucket in _map)
+            {
+                foreach (Entry<K, V> entry in bucket)
+                {
+                    allKeys.Add(entry.Key);
+                }
+            }
+            return allKeys.ToArray();
         }
 
         public void Remove(K key)
         {
-            throw new System.NotImplementedException();
+            LinkedList<Entry<K, V>> bucket = GetOrCreateBucket(key);
+            if (bucket.Count == 0) return;
+            foreach (Entry<K, V> entry in bucket)
+            {
+                if (entry.Key.Equals(key))
+                {
+                    bucket.Remove(entry);
+                    _size--;
+                }
+            }
         }
 
         public V[] Values()
         {
-            throw new System.NotImplementedException();
+            List<V> allValues = new List<V>();
+            foreach (LinkedList<Entry<K, V>> bucket in _map)
+            {
+                foreach (Entry<K, V> entry in bucket)
+                {
+                    allValues.Add(entry.Value);
+                }
+            }
+            return allValues.ToArray();
+        }
+
+        private V GetValueOrDefault(K key)
+        {
+            var bucket = this.GetOrCreateBucket(key);
+            if (bucket.Count == 0) return default(V);
+            foreach (Entry<K, V> entry in bucket)
+            {
+                if (entry.Key.Equals(key))
+                    return entry.Value;
+            }
+            return default(V);
         }
 
         private int hash(K key, int tableLength)
@@ -104,7 +138,7 @@ namespace csharp.Section1.Dictionary
             return key.GetHashCode() % tableLength;
         }
 
-        private LinkedList<Entry<K, V>> getOrCreateBucket(K key)
+        private LinkedList<Entry<K, V>> GetOrCreateBucket(K key)
         {
             int index = this.hash(key, _map.Length);
             var bucket = _map[index];
@@ -112,19 +146,18 @@ namespace csharp.Section1.Dictionary
             {
                 bucket = new LinkedList<Entry<K, V>>();
                 _map[index] = bucket;
-
             }
             return bucket;
         }
 
-        private bool doesNeedResizing()
+        private bool DoesNeedResizing()
         {
             double maxLoadFactor = 0.75;
             double loadFactor = _size / _map.Length;
             return loadFactor >= maxLoadFactor;
         }
 
-        private void resize()
+        private void Resize()
         {
             int updatedCapacity = _map.Length * 2;
             LinkedList<Entry<K, V>>[] updatedMap = new LinkedList<Entry<K, V>>[updatedCapacity];
