@@ -52,9 +52,8 @@ namespace csharp.Section1.Dictionary
 
         public bool ContainsKey(K key)
         {
-            int index = this.hash(key, _map.Length);
-            if (_map[index] == null) return false;
-            LinkedList<Entry<K, V>> bucket = _map[index];
+            LinkedList<Entry<K, V>> bucket = GetOrCreateBucket(key);
+
             foreach (Entry<K, V> entry in bucket)
             {
                 if (entry.Key.Equals(key))
