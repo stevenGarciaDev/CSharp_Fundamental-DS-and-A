@@ -20,8 +20,12 @@ namespace csharp.Section2.AVLTree
 
         public string InOrderTraversal(AVLNode<T> node, StringBuilder stringBuilder)
         {
-
             return "";
+        }
+
+        public AVLNode<T> Find(T value)
+        {
+            return null;
         }
 
         public void Insert(T value)
@@ -34,6 +38,19 @@ namespace csharp.Section2.AVLTree
             if (Root == null) return 0;
 
             return Math.Max(Height(Root.LeftChild), Height(Root.RightChild)) + 1;
+        }
+
+        private AVLNode<T> Find(AVLNode<T> node, T value)
+        {
+            if (node == null) return null;
+
+            if (node.Value.Equals(value))
+                return node;
+
+            if (value.CompareTo(node.Value) == -1)
+                return Find(node.LeftChild, value);
+
+            return Find(node.RightChild, value);
         }
 
         private AVLNode<T> Insert(AVLNode<T> node, T value)
@@ -72,13 +89,13 @@ namespace csharp.Section2.AVLTree
         {
             if (IsLeftHeavy(node))
             {
-                if (IsRightHeavy(node.LeftChild))
+                if (BalanceFactor(node.LeftChild) < 0)
                     RotateLeft(node.LeftChild);
                 RotateRight(node);
             }
             else if (IsRightHeavy(node))
             {
-                if (IsLeftHeavy(node.RightChild))
+                if (BalanceFactor(node.RightChild) > 0)
                     RotateRight(node.RightChild);
                 RotateLeft(node);
             }
@@ -114,6 +131,10 @@ namespace csharp.Section2.AVLTree
             return newRoot;
         }
 
+        /*
+
+        
+        */
         private int BalanceFactor(AVLNode<T> node)
         {
             return (node == null) ? 0 : Height(node.LeftChild) - Height(node.RightChild);
@@ -128,5 +149,7 @@ namespace csharp.Section2.AVLTree
         {
             return BalanceFactor(node) < -1;
         }
+
+        private bool IsALeaf(AVLNode<T> node) => node.LeftChild == null && node.RightChild == null;
     }
 }
